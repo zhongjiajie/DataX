@@ -52,7 +52,7 @@
               { "name": "col_keyword", "type": "keyword" },
               { "name": "col_text", "type": "text", "analyzer": "ik_max_word"},
               { "name": "col_geo_point", "type": "geo_point" },
-              { "name": "col_date", "type": "date", "format": "yyyy-MM-dd HH:mm:ss"},
+              { "name": "col_date", "type": "date", "fromFormat": "yyyy-MM-dd HH:mm:ss"},
               { "name": "col_nested1", "type": "nested" },
               { "name": "col_nested2", "type": "nested" },
               { "name": "col_object1", "type": "object" },

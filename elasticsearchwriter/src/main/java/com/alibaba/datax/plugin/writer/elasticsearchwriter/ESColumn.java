@@ -11,7 +11,9 @@ public class ESColumn {
 
     private String timezone;
 
-    private String format;
+    private String fromFormat;
+
+    private String toFormat;
 
     private Boolean array;
 
@@ -27,8 +29,8 @@ public class ESColumn {
         this.timezone = timezone;
     }
 
-    public void setFormat(String format) {
-        this.format = format;
+    public void setFromFormat(String fromFormat) {
+        this.fromFormat = fromFormat;
     }
 
     public String getName() {
@@ -43,8 +45,8 @@ public class ESColumn {
         return timezone;
     }
 
-    public String getFormat() {
-        return format;
+    public String getFromFormat() {
+        return fromFormat;
     }
 
     public void setTimezone(String timezone) {
@@ -61,5 +63,13 @@ public class ESColumn {
 
     public Boolean getArray() {
         return array;
+    }
+
+    public String getToFormat() {
+        return toFormat;
+    }
+
+    public void setToFormat(String toFormat) {
+        this.toFormat = toFormat;
     }
 }
