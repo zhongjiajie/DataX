@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -142,15 +141,13 @@ public class ESWriter extends Writer {
                             break;
                         case DATE:
                             columnItem.setTimeZone(jo.getString("timezone"));
-                            columnItem.setFormat(jo.getString("format"));
-                            // 后面时间会处理为带时区的标准时间,所以不需要给ES指定格式
-                            /*
-                            if (jo.getString("format") != null) {
-                                field.put("format", jo.getString("format"));
+                            columnItem.setFromFormat(jo.getString("fromFormat"));
+                            columnItem.setToFormat(jo.getString("toFormat"));
+                            if (jo.getString("toFormat") != null) {
+                                field.put("format", jo.getString("toFormat"));
                             } else {
-                                //field.put("format", "strict_date_optional_time||epoch_millis||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd");
+                                field.put("format", "strict_date_optional_time||epoch_millis||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd");
                             }
-                            */
                             break;
                         case GEO_SHAPE:
                             field.put("tree", jo.getString("tree"));
@@ -297,13 +294,24 @@ public class ESWriter extends Writer {
                 // 所有时区参考 http://www.joda.org/joda-time/timezones.html
                 dtz = DateTimeZone.forID(esColumn.getTimezone());
             }
-            if (column.getType() != Column.Type.DATE && esColumn.getFormat() != null) {
-                DateTimeFormatter formatter = DateTimeFormat.forPattern(esColumn.getFormat());
+            if (column.getType() != Column.Type.DATE && esColumn.getFromFormat() != null
+                    && column.getRawData() != null) {
+                DateTimeFormatter formatter = DateTimeFormat.forPattern(esColumn.getFromFormat());
                 date = formatter.withZone(dtz).parseDateTime(column.asString());
-                return date.toString();
-            } else if (column.getType() == Column.Type.DATE) {
+                if (esColumn.getToFormat() != null) {
+                    DateTimeFormatter dtfOut = DateTimeFormat.forPattern(esColumn.getToFormat());
+                    return dtfOut.print(date);
+                } else {
+                    return date.toString();
+                }
+            } else if (column.getType() == Column.Type.DATE && column.getRawData() != null) {
                 date = new DateTime(column.asLong(), dtz);
-                return date.toString();
+                if (esColumn.getToFormat() != null) {
+                    DateTimeFormatter dtfOut = DateTimeFormat.forPattern(esColumn.getToFormat());
+                    return dtfOut.print(date);
+                } else {
+                    return date.toString();
+                }
             } else {
                 return column.asString();
             }
