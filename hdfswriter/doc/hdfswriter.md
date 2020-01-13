@@ -229,6 +229,8 @@ HdfsWriter提供向HDFS文件系统指定路径中写入TEXTFile文件和ORCFile
 
  	* 描述：hdfswriter写入前数据清理处理模式： <br />
 
+		* truncate，删除配置目录 `path` 中的全部文件。
+		* delete，仅删除配置目录 `path` 中以 `fileName` 开头的文件
 		* append，写入前不做任何处理，DataX hdfswriter直接使用filename写入，并保证文件名不冲突。
 		* nonConflict，如果目录下有fileName前缀的文件，直接报错。
 

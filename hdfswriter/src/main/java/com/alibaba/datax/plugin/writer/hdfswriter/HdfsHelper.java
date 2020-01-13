@@ -176,6 +176,20 @@ public  class HdfsHelper {
         return isDir;
     }
 
+    public void truncateDir(String path){
+        LOG.info(String.format("truncate all files in directory path [%s].", path));
+        try {
+            String[] paths = hdfsDirList(path);
+            for(String p : paths) {
+                fileSystem.delete(new Path(p), true);
+            }
+        } catch (IOException e) {
+            String message = String.format("清空文件夹[%s]中的文件时发生IO异常,请检查您的网络是否正常！", path);
+            LOG.error(message);
+            throw DataXException.asDataXException(HdfsWriterErrorCode.CONNECT_HDFS_IO_ERROR, e);
+        }
+    }
+
     public void deleteFiles(Path[] paths){
         for(int i=0;i<paths.length;i++){
             LOG.info(String.format("delete file [%s].", paths[i].toString()));
