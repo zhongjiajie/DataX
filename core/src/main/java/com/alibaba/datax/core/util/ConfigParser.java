@@ -28,7 +28,6 @@ public final class ConfigParser {
         configuration.merge(
                 ConfigParser.parseCoreConfig(CoreConstant.DATAX_CONF_PATH),
                 false);
-        // todo config优化，只捕获需要的plugin
         String readerPluginName = configuration.getString(
                 CoreConstant.DATAX_JOB_CONTENT_READER_NAME);
         String writerPluginName = configuration.getString(
@@ -120,25 +119,18 @@ public final class ConfigParser {
 
         Set<String> replicaCheckPluginSet = new HashSet<String>();
         int complete = 0;
-        for (final String each : ConfigParser
-                .getDirAsList(CoreConstant.DATAX_PLUGIN_READER_HOME)) {
-            Configuration eachReaderConfig = ConfigParser.parseOnePluginConfig(each, "reader", replicaCheckPluginSet, wantPluginNames);
+
+        for (String pluginName: wantPluginNames) {
+            String type = pluginName.contains("writer") ? "writer": "reader";
+            String pluginPath = ConfigParser.getPluginPath(pluginName);
+            Configuration eachReaderConfig = ConfigParser.parseOnePluginConfig(pluginPath, type, replicaCheckPluginSet, wantPluginNames);
             if(eachReaderConfig!=null) {
                 configuration.merge(eachReaderConfig, true);
                 complete += 1;
             }
         }
 
-        for (final String each : ConfigParser
-                .getDirAsList(CoreConstant.DATAX_PLUGIN_WRITER_HOME)) {
-            Configuration eachWriterConfig = ConfigParser.parseOnePluginConfig(each, "writer", replicaCheckPluginSet, wantPluginNames);
-            if(eachWriterConfig!=null) {
-                configuration.merge(eachWriterConfig, true);
-                complete += 1;
-            }
-        }
-
-        if (wantPluginNames != null && wantPluginNames.size() > 0 && wantPluginNames.size() != complete) {
+        if (wantPluginNames.size() > 0 && wantPluginNames.size() != complete) {
             throw DataXException.asDataXException(FrameworkErrorCode.PLUGIN_INIT_ERROR, "插件加载失败，未完成指定插件加载:" + wantPluginNames);
         }
 
@@ -179,19 +171,15 @@ public final class ConfigParser {
         return result;
     }
 
-    private static List<String> getDirAsList(String path) {
-        List<String> result = new ArrayList<String>();
-
-        String[] paths = new File(path).list();
-        if (null == paths) {
-            return result;
+    private static String getPluginPath(String pluginName) {
+        if (pluginName.toLowerCase().contains("reader")) {
+            return CoreConstant.DATAX_PLUGIN_READER_HOME + File.separator + pluginName;
+        } else if (pluginName.toLowerCase().contains("writer")) {
+            return CoreConstant.DATAX_PLUGIN_WRITER_HOME + File.separator + pluginName;
+        } else {
+            throw DataXException.asDataXException(
+                    FrameworkErrorCode.PLUGIN_INIT_ERROR, "无法识别 [" + pluginName + "] 是读插件还是写插件");
         }
-
-        for (final String each : paths) {
-            result.add(path + File.separator + each);
-        }
-
-        return result;
     }
 
 }
