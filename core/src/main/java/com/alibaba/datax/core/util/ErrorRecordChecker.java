@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 /**
  * 检查任务是否到达错误记录限制。有检查条数（recordLimit）和百分比(percentageLimit)两种方式。
  * 1. errorRecord表示出错条数不能大于限制数，当超过时任务失败。比如errorRecord为0表示不容许任何脏数据。
- * 2. errorPercentage表示出错比例，在任务结束时校验。
+ * 2. errorPercentage表示出错比例，在任务结束时校验。仅取百分比中的数字忽略百分号
  * 3. errorRecord优先级高于errorPercentage。
  */
 public final class ErrorRecordChecker {
@@ -32,8 +32,9 @@ public final class ErrorRecordChecker {
         percentageLimit = percentage;
 
         if (percentageLimit != null) {
-            Validate.isTrue(0.0 <= percentageLimit && percentageLimit <= 1.0,
-                    "脏数据百分比限制应该在[0.0, 1.0]之间");
+            LOG.info("percentage使用标准的百分比(配置值忽略百分号),如 [45.45%] 的配置为:\"percentage\": 45.45");
+            Validate.isTrue(0.0 <= percentageLimit && percentageLimit <= 100.0,
+                    "脏数据百分比限制应该在[0.0, 100.0]之间(配置值忽略百分号)");
         }
 
         if (recordLimit != null) {
@@ -41,6 +42,7 @@ public final class ErrorRecordChecker {
                     "脏数据条数现在应该为非负整数");
 
             // errorRecord优先级高于errorPercentage.
+            LOG.info("配置了 errorLimit.record, 其优先级高于 errorLimit.percentage 会将覆盖 errorLimit.percentage");
             percentageLimit = null;
         }
     }
@@ -67,16 +69,17 @@ public final class ErrorRecordChecker {
             return;
         }
         LOG.debug(String.format(
-                "Error-limit set to %f, error percent check.", percentageLimit));
+                "Error-limit set to %f%%, error percent check.", percentageLimit));
 
         long total = CommunicationTool.getTotalReadRecords(communication);
         long error = CommunicationTool.getTotalErrorRecords(communication);
+        double errorPercentage = ((double) error / (double) total) * 100;
 
-        if (total > 0 && ((double) error / (double) total) > percentageLimit) {
+        if (total > 0 && (errorPercentage > percentageLimit)) {
             throw DataXException.asDataXException(
                     FrameworkErrorCode.PLUGIN_DIRTY_DATA_LIMIT_EXCEED,
-                    String.format("脏数据百分比检查不通过，限制是[%f]，但实际上捕获到[%f].",
-                            percentageLimit, ((double) error / (double) total)));
+                    String.format("脏数据百分比检查不通过，限制是[ %f%% ]，但实际上捕获到[ %f%% ].",
+                            percentageLimit, errorPercentage));
         }
     }
 }

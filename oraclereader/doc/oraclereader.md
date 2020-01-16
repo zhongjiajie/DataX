@@ -35,8 +35,8 @@ OracleReader插件实现了从Oracle读取数据。在底层实现上，OracleRe
                 "errorLimit": {
                 //先选择record
                 "record": 0,
-                //百分比  1表示100%
-                "percentage": 0.02
+                //出错的record百分比 范围在 [0, 100] 2表示2%
+                "percentage": 2
             }
         },
         "content": [

@@ -6,7 +6,7 @@
             },
             "errorLimit": {
                 "record": 0,
-                "percentage": 0.02
+                "percentage": 2
             }
         },
         "content": [
