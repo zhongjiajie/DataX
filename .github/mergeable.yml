@@ -1,0 +1,7 @@
+version: 2
+mergeable:
+  - when: pull_request.*, pull_request_review.*
+    validate:
+      - do: dependent
+        files: ['CHANGELOG-BETWEEN-UPSTREAM.md']
+        message: 'Each change should mark your diff between alibaba/Datax in `CHANGELOG-BETWEEN-UPSTREAM.md`'
