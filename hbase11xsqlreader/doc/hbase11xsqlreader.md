@@ -48,8 +48,8 @@ hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实
             "errorLimit": {
                 //出错的record条数上限，当大于该值即报错。
                 "record": 0,
-                //出错的record百分比上限 1.0表示100%，0.02表示2%
-                "percentage": 0.02
+                //出错的record百分比 范围在 [0, 100] 2表示2%
+                "percentage": 2
             }   
         },  
         "content": [ { 
@@ -159,8 +159,8 @@ hbase11xsqlreader插件实现了从Phoenix(HBase SQL)读取数据。在底层实
             "errorLimit": {
                 //出错的record条数上限，当大于该值即报错。
                 "record": 0,
-                //出错的record百分比上限 1.0表示100%，0.02表示2%
-                "percentage": 0.02
+                //出错的record百分比 范围在 [0, 100] 2表示2%
+                "percentage": 2
             }   
         },  
         "content": [ { 

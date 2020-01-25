@@ -31,7 +31,7 @@ RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReade
             },
             "errorLimit": {
                 "record": 0,
-                "percentage": 0.02
+                "percentage": 2
             }
         },
         "content": [
@@ -84,7 +84,7 @@ RDBMSReader插件实现了从RDBMS读取数据。在底层实现上，RDBMSReade
             },
             "errorLimit": {
                 "record": 0,
-                "percentage": 0.02
+                "percentage": 2
             }
         },
         "content": [

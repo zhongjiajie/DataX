@@ -34,7 +34,7 @@ MysqlReader插件实现了从Mysql读取数据。在底层实现上，MysqlReade
             },
             "errorLimit": {
                 "record": 0,
-                "percentage": 0.02
+                "percentage": 2
             }
         },
         "content": [

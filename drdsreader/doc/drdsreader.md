@@ -36,8 +36,8 @@ DRDS的插件目前DataX只适配了Mysql引擎的场景，DRDS对于DataX而言
                 "errorLimit": {
                 //出错的record条数上限，当大于该值即报错。
                 "record": 0,
-                //出错的record百分比上限 1.0表示100%，0.02表示2%
-                "percentage": 0.02
+                //出错的record百分比 范围在 [0, 100] 2表示2%
+                "percentage": 2
             }
         },
         "content": [
