@@ -8,6 +8,7 @@
 * 在CI中增加`mergeable`以防没有修改`CHANGELOG-BETWEEN-UPSTREAM.md`的PR被合并
 * 修复HDFS reader读取ORC文件过大导致的丢数据问题,[ISSUE-527][1]
 * 将 errorLimit 中的 percentage 统一成和日志提示进度中的 percentage 一致, 即 [0, 100] 的数字(去掉百分号)
+* Revert了增加`mergeable`的commit,因为他的行为和预想的不一样
 
 ---
 
