@@ -15,12 +15,15 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hive.ql.io.RCFile;
 import org.apache.hadoop.hive.ql.io.RCFileRecordReader;
 import org.apache.hadoop.hive.ql.io.orc.OrcFile;
 import org.apache.hadoop.hive.ql.io.orc.OrcInputFormat;
 import org.apache.hadoop.hive.ql.io.orc.OrcSerde;
 import org.apache.hadoop.hive.ql.io.orc.Reader;
+import org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat;
+import org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefArrayWritable;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
@@ -29,6 +32,13 @@ import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.ReflectionUtils;
+
+import org.apache.parquet.format.converter.ParquetMetadataConverter;
+import org.apache.parquet.hadoop.ParquetFileReader;
+import org.apache.parquet.hadoop.ParquetReader;
+import org.apache.parquet.hadoop.metadata.ParquetMetadata;
+import org.apache.parquet.tools.read.SimpleReadSupport;
+import org.apache.parquet.tools.read.SimpleRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -289,9 +299,10 @@ public class DFSUtil {
 
     }
 
-    public void orcFileStartRead(String sourceOrcFilePath, Configuration readerSliceConfig,
-                                 RecordSender recordSender, TaskPluginCollector taskPluginCollector) {
-        LOG.info(String.format("Start Read orcfile [%s].", sourceOrcFilePath));
+    public void orcAndParquetFileStartRead(String fileType, String sourceFilePath, Configuration readerSliceConfig,
+                                           RecordSender recordSender, TaskPluginCollector taskPluginCollector) {
+        String type = Constant.PAR.equals(fileType) ? "parquetfile" : "orcfile";
+        LOG.info(String.format("Start Read %s [%s].", type, sourceFilePath));
         List<ColumnEntry> column = UnstructuredStorageReaderUtil
                 .getListColumnEntry(readerSliceConfig, com.alibaba.datax.plugin.unstructuredstorage.reader.Key.COLUMN);
         String nullFormat = readerSliceConfig.getString(com.alibaba.datax.plugin.unstructuredstorage.reader.Key.NULL_FORMAT);
@@ -301,7 +312,7 @@ public class DFSUtil {
         int columnIndexMax = -1;
         // 判断是否读取所有列
         if (null == column || column.size() == 0) {
-            int allColumnsCount = getAllColumnsCount(sourceOrcFilePath);
+            int allColumnsCount = getAllColumnsCount(fileType, sourceFilePath);
             columnIndexMax = allColumnsCount - 1;
             isReadAllColumns = true;
         } else {
@@ -317,16 +328,25 @@ public class DFSUtil {
         }
         if (columnIndexMax >= 0) {
             JobConf conf = new JobConf(hadoopConf);
-            Path orcFilePath = new Path(sourceOrcFilePath);
+            Path filePath = new Path(sourceFilePath);
             Properties p = new Properties();
             p.setProperty("columns", allColumns.toString());
             p.setProperty("columns.types", allColumnTypes.toString());
             try {
-                OrcSerde serde = new OrcSerde();
-                serde.initialize(conf, p);
-                StructObjectInspector inspector = (StructObjectInspector) serde.getObjectInspector();
-                InputFormat<?, ?> in = new OrcInputFormat();
-                FileInputFormat.setInputPaths(conf, orcFilePath.toString());
+                StructObjectInspector inspector;
+                InputFormat<?, ?> in;
+                if (Constant.PAR.equals(fileType)) {
+                    ParquetHiveSerDe serde = new ParquetHiveSerDe();
+                    serde.initialize(conf, p);
+                    inspector = (StructObjectInspector) serde.getObjectInspector();
+                    in = new MapredParquetInputFormat();
+                } else {
+                    OrcSerde serde = new OrcSerde();
+                    serde.initialize(conf, p);
+                    inspector = (StructObjectInspector) serde.getObjectInspector();
+                    in = new OrcInputFormat();
+                }
+                FileInputFormat.setInputPaths(conf, filePath.toString());
 
                 //If the network disconnected, will retry 45 times, each time the retry interval for 20 seconds
                 //Each file as a split
@@ -357,8 +377,7 @@ public class DFSUtil {
                     reader.close();
                 }
             } catch (Exception e) {
-                String message = String.format("从orcfile文件路径[%s]中读取数据发生异常，请联系系统管理员。"
-                        , sourceOrcFilePath);
+                String message = String.format("从%s文件路径[%s]中读取数据发生异常，请联系系统管理员。", type, sourceFilePath);
                 LOG.error(message);
                 throw DataXException.asDataXException(HdfsReaderErrorCode.READ_FILE_ERROR, message);
             }
@@ -490,13 +509,19 @@ public class DFSUtil {
         return record;
     }
 
-    private int getAllColumnsCount(String filePath) {
+    private int getAllColumnsCount(String fileType, String filePath) {
+        String type = Constant.PAR.equals(fileType) ? "parquetfile" : "orcfile";
         Path path = new Path(filePath);
         try {
-            Reader reader = OrcFile.createReader(path, OrcFile.readerOptions(hadoopConf));
-            return reader.getTypes().get(0).getSubtypesCount();
+            if (Constant.PAR.equals(fileType)) {
+                ParquetMetadata readerFooter = ParquetFileReader.readFooter(hadoopConf, path, ParquetMetadataConverter.NO_FILTER);
+                return readerFooter.getFileMetaData().getSchema().getColumns().size();
+            } else {
+                Reader reader = OrcFile.createReader(path, OrcFile.readerOptions(hadoopConf));
+                return reader.getTypes().get(0).getSubtypesCount();
+            }
         } catch (IOException e) {
-            String message = "读取orcfile column列数失败，请联系系统管理员";
+            String message = String.format("读取%s column列数失败，请联系系统管理员", type);
             throw DataXException.asDataXException(HdfsReaderErrorCode.READ_FILE_ERROR, message);
         }
     }
@@ -544,8 +569,12 @@ public class DFSUtil {
                 if (isSEQ) {
                     return false;
                 }
+                boolean isPar = isPARFile(file, in);
+                if (isPar) {
+                    return false;
+                }
                 // 如果不是ORC,RC和SEQ,则默认为是TEXT或CSV类型
-                return !isORC && !isRC && !isSEQ;
+                return !isORC && !isRC && !isSEQ && !isPar;
 
             } else if (StringUtils.equalsIgnoreCase(specifiedFileType, Constant.ORC)) {
 
@@ -556,6 +585,8 @@ public class DFSUtil {
             } else if (StringUtils.equalsIgnoreCase(specifiedFileType, Constant.SEQ)) {
 
                 return isSequenceFile(filepath, in);
+            } else if (StringUtils.equalsIgnoreCase(specifiedFileType, Constant.PAR)) {
+                return isPARFile(file, in);
             }
 
         } catch (Exception e) {
@@ -606,6 +637,20 @@ public class DFSUtil {
             }
         } catch (IOException e) {
             LOG.info(String.format("检查文件类型: [%s] 不是ORC File.", file.toString()));
+        }
+        return false;
+    }
+    //判断是否为parquet
+    private boolean isPARFile(Path file, FSDataInputStream in) {
+        try {
+            hadoopConf.set("fs.hdfs.impl", DistributedFileSystem.class.getName());
+            System.out.println(JSON.toJSONString(hadoopConf));
+            ParquetReader<SimpleRecord> reader = ParquetReader.builder(new SimpleReadSupport(), file).withConf(hadoopConf).build();
+            if (reader.read() != null) {
+                return true;
+            }
+        } catch (IOException e) {
+            LOG.info(String.format("检查文件类型: [%s] 不是PAR File.", file.toString()));
         }
         return false;
     }
