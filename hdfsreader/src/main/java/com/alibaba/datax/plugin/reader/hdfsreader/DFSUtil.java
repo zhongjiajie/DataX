@@ -476,9 +476,8 @@ public class DFSUtil {
                     String columnValue = null;
 
                     if (null != columnIndex) {
-                        if (null != recordFields.get(columnIndex)){
+                        if (null != recordFields.get(columnIndex))
                             columnValue = recordFields.get(columnIndex).toString();
-                        }
                     } else {
                         columnValue = columnConst;
                     }
@@ -715,8 +714,6 @@ public class DFSUtil {
     }
     //判断是否为parquet
     private boolean isPARFile(Path file, FSDataInputStream in) {
-
-
         try {
             hadoopConf.set("fs.hdfs.impl", DistributedFileSystem.class.getName());
             System.out.println(JSON.toJSONString(hadoopConf));
@@ -724,8 +721,6 @@ public class DFSUtil {
             if (reader.read() != null) {
                 return true;
             }
-
-
         } catch (IOException e) {
             LOG.info(String.format("检查文件类型: [%s] 不是PAR File.", file.toString()));
         }

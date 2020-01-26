@@ -5,5 +5,5 @@ package com.alibaba.datax.plugin.reader.hdfsreader;
  *
  */
 public enum HdfsFileType {
-    ORC, SEQ, RC, CSV, TEXT,PAR,
+    ORC, SEQ, RC, CSV, TEXT, PAR,
 }
