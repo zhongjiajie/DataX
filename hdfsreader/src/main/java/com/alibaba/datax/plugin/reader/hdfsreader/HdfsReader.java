@@ -267,7 +267,7 @@ public class HdfsReader extends Reader {
                             recordSender, this.getTaskPluginCollector());
                 }else if(specifiedFileType.equalsIgnoreCase(Constant.ORC)){
 
-                    dfsUtil.orcFileStartRead(sourceFile, this.taskConfig, recordSender, this.getTaskPluginCollector());
+                    dfsUtil.orcAndParquetFileStartRead(Constant.ORC, sourceFile, this.taskConfig, recordSender, this.getTaskPluginCollector());
                 }else if(specifiedFileType.equalsIgnoreCase(Constant.SEQ)){
 
                     dfsUtil.sequenceFileStartRead(sourceFile, this.taskConfig, recordSender, this.getTaskPluginCollector());
@@ -275,7 +275,7 @@ public class HdfsReader extends Reader {
 
                     dfsUtil.rcFileStartRead(sourceFile, this.taskConfig, recordSender, this.getTaskPluginCollector());
                 }else if (specifiedFileType.equalsIgnoreCase(Constant.PAR)) {
-                        dfsUtil.parquetFileStartRead(sourceFile, this.taskConfig, recordSender, this.getTaskPluginCollector());
+                        dfsUtil.orcAndParquetFileStartRead(Constant.PAR, sourceFile, this.taskConfig, recordSender, this.getTaskPluginCollector());
                 }else {
 
                     String message = "HdfsReader插件目前支持ORC, TEXT, CSV, SEQUENCE, RC五种格式的文件," +
