@@ -176,6 +176,9 @@ public class DFSUtil {
             if (f.isDirectory()) {
                 LOG.info(String.format("[%s] 是目录, 递归获取该目录下的文件", f.getPath().toString()));
                 getHDFSAllFilesNORegex(f.getPath().toString(), hdfs);
+            } else if (f.getLen() == 0){
+                String message = String.format("文件[%s]长度为0，将会跳过不作处理！", path);
+                LOG.warn(message);
             } else if (f.isFile()) {
 
                 addSourceFileByType(f.getPath().toString());
