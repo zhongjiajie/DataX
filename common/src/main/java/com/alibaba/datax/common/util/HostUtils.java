@@ -22,7 +22,7 @@ public class HostUtils {
         try {
             InetAddress addr = InetAddress.getLocalHost();
             ip = addr.getHostAddress();
-            hostname = addr.getHostName();
+            hostname = addr.getCanonicalHostName();
         } catch (UnknownHostException e) {
             log.error("Can't find out address: " + e.getMessage());
             ip = "UNKNOWN";
