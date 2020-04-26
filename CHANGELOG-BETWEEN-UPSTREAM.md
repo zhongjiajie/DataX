@@ -12,6 +12,7 @@
 * 增加 HDFS reader 的 parquet 文件类型支持
 * 规范日志文件名的命名
 * HDFS-writer新增是否创建路径配置`crtPathNotExists`和文件写入人`user`
+* 新增Github Action实现新PR合并到master自动发布
 
 ---
 
