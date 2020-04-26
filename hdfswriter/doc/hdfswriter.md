@@ -102,6 +102,8 @@ HdfsWriter提供向HDFS文件系统指定路径中写入TEXTFile文件和ORCFile
                     "name": "hdfswriter",
                     "parameter": {
                         "defaultFS": "hdfs://xxx:port",
+                        "crtPathNotExists": "false",
+                        "user": "hive",
                         "fileType": "orc",
                         "path": "/user/hive/warehouse/writerorc.db/orcfull",
                         "fileName": "xxxx",
@@ -192,6 +194,22 @@ HdfsWriter提供向HDFS文件系统指定路径中写入TEXTFile文件和ORCFile
 	* 描述：存储到Hadoop hdfs文件系统的路径信息，HdfsWriter会根据并发配置在Path目录下写入多个文件。为与hive表关联，请填写hive表在hdfs上的存储路径。例：Hive上设置的数据仓库的存储路径为：/user/hive/warehouse/ ，已建立数据库：test，表：hello；则对应的存储路径为：/user/hive/warehouse/test.db/hello  <br />
 
 	* 必选：是 <br />
+
+	* 默认值：无 <br />
+	
+* **crtPathNotExists**
+
+	* 描述：当配置路径 path 不存在的情况下，是否自动创建路径，**如果HIVE是分区表，请在使用HIVE表前先使用[MSCK][1]修复分区** <br />
+
+	* 必选：否 <br />
+
+	* 默认值：false <br />
+
+* **user**
+
+	* 描述：写hdfs文件的用户 <br />
+
+	* 必选：否 <br />
 
 	* 默认值：无 <br />
 
@@ -393,3 +411,7 @@ orc_table在hdfs上存储路径为：/user/hive/warehouse/hdfswriter.db/orc_tabl
 ## 6 FAQ
 
 略
+
+---
+
+[1]: https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-RecoverPartitions(MSCKREPAIRTABLE)

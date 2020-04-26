@@ -11,6 +11,7 @@
 * Revert了增加`mergeable`的commit,因为他的行为和预想的不一样
 * 增加 HDFS reader 的 parquet 文件类型支持
 * 规范日志文件名的命名
+* HDFS-writer新增是否创建路径配置`crtPathNotExists`和文件写入人`user`
 
 ---
 
