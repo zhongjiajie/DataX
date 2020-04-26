@@ -6,6 +6,8 @@ package com.alibaba.datax.plugin.writer.hdfswriter;
 public class Key {
     // must have
     public static final String PATH = "path";
+    // optional default false
+    public static final String CRT_PATH_NOT_EXISTS = "crtPathNotExists";
     //must have
     public final static String DEFAULT_FS = "defaultFS";
     //must have
@@ -33,4 +35,5 @@ public class Key {
     public static final String KERBEROS_PRINCIPAL = "kerberosPrincipal";
     // hadoop config
     public static final String HADOOP_CONFIG = "hadoopConfig";
+    public static final String USER = "user";
 }

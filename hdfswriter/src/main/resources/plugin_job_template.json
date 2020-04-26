@@ -2,8 +2,10 @@
     "name": "hdfswriter",
     "parameter": {
         "defaultFS": "",
+        "user": "",
         "fileType": "",
         "path": "",
+        "crtPathNotExists": "",
         "fileName": "",
         "column": [],
         "writeMode": "",

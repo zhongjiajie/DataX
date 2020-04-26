@@ -24,6 +24,7 @@ public class HdfsWriter extends Writer {
 
         private String defaultFS;
         private String path;
+        private boolean crtPathNotExists;
         private String fileType;
         private String fileName;
         private List<Configuration> columns;
@@ -66,6 +67,8 @@ public class HdfsWriter extends Writer {
                 LOG.error(message);
                 throw DataXException.asDataXException(HdfsWriterErrorCode.ILLEGAL_VALUE, message);
             }
+            // create path if not exists
+            this.crtPathNotExists = this.writerSliceConfig.getBool(Key.CRT_PATH_NOT_EXISTS, false);
             //fileName
             this.fileName = this.writerSliceConfig.getNecessaryValue(Key.FILE_NAME, HdfsWriterErrorCode.REQUIRED_VALUE);
             //columns check
@@ -147,8 +150,15 @@ public class HdfsWriter extends Writer {
 
         @Override
         public void prepare() {
+            boolean pathExists = hdfsHelper.isPathexists(path);
+            if (!pathExists && this.crtPathNotExists) {
+                LOG.info(String.format("配置路径 [%s] 不存在,但 crtPathNotExists 设置成 true, 将自动创建路径", path));
+                Path notExistsPath = new Path(path);
+                hdfsHelper.createDir(notExistsPath);
+                pathExists = true;
+            }
             //若路径已经存在，检查path是否是目录
-            if(hdfsHelper.isPathexists(path)){
+            if(pathExists){
                 if(!hdfsHelper.isPathDir(path)){
                     throw DataXException.asDataXException(HdfsWriterErrorCode.ILLEGAL_VALUE,
                             String.format("您配置的path: [%s] 不是一个合法的目录, 请您注意文件重名, 不合法目录名等情况.",
@@ -182,7 +192,8 @@ public class HdfsWriter extends Writer {
                 }
             }else{
                 throw DataXException.asDataXException(HdfsWriterErrorCode.ILLEGAL_VALUE,
-                        String.format("您配置的path: [%s] 不存在, 请先在hive端创建对应的数据库和表.", path));
+                        String.format("您配置的path: [%s] 不存在,且 crtPathNotExists 没有设置成 true," +
+                                "请先在hive端创建对应的数据库或表,或者将 crtPathNotExists 设置成 true", path));
             }
         }
 
@@ -361,6 +372,7 @@ public class HdfsWriter extends Writer {
                         this.getTaskPluginCollector());
             }else if(fileType.equalsIgnoreCase("ORC")){
                 //写ORC FILE
+
                 hdfsHelper.orcFileStartWrite(lineReceiver,this.writerSliceConfig, this.fileName,
                         this.getTaskPluginCollector());
             }

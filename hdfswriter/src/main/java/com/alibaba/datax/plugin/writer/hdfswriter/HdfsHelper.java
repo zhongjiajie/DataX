@@ -25,6 +25,7 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
+import java.security.PrivilegedExceptionAction;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -35,6 +36,7 @@ public  class HdfsHelper {
     public org.apache.hadoop.conf.Configuration hadoopConf = null;
     public static final String HADOOP_SECURITY_AUTHENTICATION_KEY = "hadoop.security.authentication";
     public static final String HDFS_DEFAULTFS_KEY = "fs.defaultFS";
+    public static final String HDFS_DEFAULTS_USER = "hadoop.job.ugi";
 
     // Kerberos
     private Boolean haveKerberos = false;
@@ -52,6 +54,11 @@ public  class HdfsHelper {
                 hadoopConf.set(each, hadoopSiteParamsAsJsonObject.getString(each));
             }
         }
+        // check if user specific
+        String user = taskConfig.getString(Key.USER, "");
+        if (!"".equals(user)) {
+            hadoopConf.set(HDFS_DEFAULTS_USER, user);
+        }
         hadoopConf.set(HDFS_DEFAULTFS_KEY, defaultFS);
 
         //是否有Kerberos认证
@@ -64,7 +71,18 @@ public  class HdfsHelper {
         this.kerberosAuthentication(this.kerberosPrincipal, this.kerberosKeytabFilePath);
         conf = new JobConf(hadoopConf);
         try {
-            fileSystem = FileSystem.get(conf);
+            if (!"".equals(user)) {
+                UserGroupInformation ugi = UserGroupInformation.createRemoteUser(user);
+                fileSystem = (FileSystem)ugi.doAs(
+                    new PrivilegedExceptionAction<FileSystem>() {
+                        public FileSystem run() throws IOException {
+                            return FileSystem.get(conf);
+                        }
+                    }
+                );
+            } else {
+                fileSystem = FileSystem.get(conf);
+            }
         } catch (IOException e) {
             String message = String.format("获取FileSystem时发生网络IO异常,请检查您的网络是否正常!HDFS地址：[%s]",
                     "message:defaultFS =" + defaultFS);
@@ -202,6 +220,17 @@ public  class HdfsHelper {
                 throw DataXException.asDataXException(HdfsWriterErrorCode.CONNECT_HDFS_IO_ERROR, e);
             }
         }
+    }
+
+    public void createDir(Path path) {
+        LOG.info(String.format("start create dir [%s] .", path.toString()));
+        try {
+            fileSystem.mkdirs(path);
+        } catch (Exception e) {
+            LOG.info(String.format("failed when create dir [%s] .", path.toString()));
+            throw DataXException.asDataXException(HdfsWriterErrorCode.CONNECT_HDFS_IO_ERROR, e);
+        }
+        LOG.info(String.format("finish create dir [%s] .", path.toString()));
     }
 
     public void deleteDir(Path path){
