@@ -16,7 +16,9 @@
 * 修改Github Action仅使用固定的tag发布防止release assert过大
 * 修改readme描述该项目概览
 * 在readme中增加当前CI状态
+* 使用[个人维护者][2]维护的clickhouse reader/writer
 
 ---
 
 [1]: https://github.com/alibaba/DataX/issues/527
+[2]: https://github.com/kuangye098/DataX/commit/8003d4ecc115e00d3d6e9dc40e08c72a24d6b119
