@@ -1,4 +1,4 @@
-package com.alibaba.datax.plugin.reader.rdbmswriter;
+package com.alibaba.datax.plugin.writer.rdbmswriter;
 
 import com.alibaba.datax.common.exception.DataXException;
 import com.alibaba.datax.common.plugin.RecordReceiver;

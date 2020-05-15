@@ -16,6 +16,8 @@
 * 修改Github Action仅使用固定的tag发布防止release assert过大
 * 修改readme描述该项目概览
 * 在readme中增加当前CI状态
+* 修正rdbmswriter包名
+* 将gdbreader/gdbwriter添加到package.xml文件中
 * 使用[个人维护者][2]维护的clickhouse reader/writer
 
 ---
