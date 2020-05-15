@@ -18,7 +18,9 @@
 * 在readme中增加当前CI状态
 * 修正rdbmswriter包名
 * 将gdbreader/gdbwriter添加到package.xml文件中
+* 使用[个人维护者][2]维护的clickhouse reader/writer
 
 ---
 
 [1]: https://github.com/alibaba/DataX/issues/527
+[2]: https://github.com/kuangye098/DataX/commit/8003d4ecc115e00d3d6e9dc40e08c72a24d6b119
