@@ -1,4 +1,4 @@
-name: Release merged master
+name: release
 
 on:
   push:
