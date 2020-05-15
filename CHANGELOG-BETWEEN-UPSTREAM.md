@@ -15,6 +15,7 @@
 * 新增Github Action实现新PR合并到master自动发布
 * 修改Github Action仅使用固定的tag发布防止release assert过大
 * 修改readme描述该项目概览
+* 在readme中增加当前CI状态
 
 ---
 

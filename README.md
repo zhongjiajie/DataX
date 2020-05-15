@@ -1,6 +1,6 @@
 ![Datax-logo][logo]
 
-<a href="https://github.com/zhongjiajie/DataX"><img alt="GitHub Actions status" src="https://github.com/zhongjiajie/DataX/workflows/Auto-Release/badge.svg"></a>
+[![Github Action](https://github.com/zhongjiajie/DataX/workflows/release/badge.svg)](https://github.com/zhongjiajie/DataX/actions)
 
 # 关于这个Fork
 
