@@ -16,6 +16,7 @@
 * 修改Github Action仅使用固定的tag发布防止release assert过大
 * 修改readme描述该项目概览
 * 在readme中增加当前CI状态
+* 修正rdbmswriter包名
 
 ---
 
