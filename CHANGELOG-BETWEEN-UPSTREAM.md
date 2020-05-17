@@ -16,6 +16,11 @@
 * 修改Github Action仅使用固定的tag发布防止release assert过大
 * 修改readme描述该项目概览
 * 在readme中增加当前CI状态
+* 增加clickhouse writer
+* 去掉clickhouse writer不必要的依赖
+* 使用getCanonicalHostName替代getHostName
+* mongodbreader支持array和dict的类型
+* 修正oraclereader中文档的sql命令
 * 修正rdbmswriter包名
 * 将gdbreader/gdbwriter添加到package.xml文件中
 * 使用[个人维护者][2]维护的clickhouse reader/writer
