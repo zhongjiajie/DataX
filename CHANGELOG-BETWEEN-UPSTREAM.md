@@ -19,6 +19,7 @@
 * 修正rdbmswriter包名
 * 将gdbreader/gdbwriter添加到package.xml文件中
 * 使用[个人维护者][2]维护的clickhouse reader/writer
+* 将clickhousereader配置到最终打包文件中
 
 ---
 
